@@ -1,4 +1,4 @@
-package com.gridscircles.backend;
+package com.yukgaejang.cafemenu;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,5 +9,4 @@ class BackendApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }
