@@ -1,0 +1,14 @@
+# Java / Gradle / IntelliJ
+backend/.gradle/
+backend/.idea/
+backend/build/
+backend/*.iml
+backend/HELP.md
+
+# Node / React
+front/node_modules/
+front/dist/
+front/.env
+
+# OS
+.DS_Store
