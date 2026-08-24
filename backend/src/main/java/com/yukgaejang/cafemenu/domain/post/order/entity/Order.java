@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor
 public class Order {
 
     /**
