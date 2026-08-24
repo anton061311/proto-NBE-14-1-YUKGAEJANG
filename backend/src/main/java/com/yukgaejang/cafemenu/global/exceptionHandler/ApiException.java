@@ -1,8 +1,16 @@
 package com.yukgaejang.cafemenu.global.exceptionHandler;
 
-public class ApiException extends RuntimeException {
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
-    public ApiException(String message) {
+@Getter
+public class ApiException extends RuntimeException {
+    private final HttpStatus status;
+    private final String code;
+
+    public ApiException(HttpStatus status, String code, String message) {
         super(message);
+        this.status = status;
+        this.code = code;
     }
 }
