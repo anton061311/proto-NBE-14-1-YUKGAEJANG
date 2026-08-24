@@ -1,4 +1,9 @@
 package com.yukgaejang.cafemenu.domain.post.product.dto;
 
-public class ProductDto {
+public record ProductDto(
+        Long id,
+        String name,
+        int price,
+        String imageUrl
+) {
 }
