@@ -1,2 +1,2 @@
-# NBE-14-1-yukgaejang
+# NBE-14-1-YUKGAEJANG
 1st-project-backend-devcourse
