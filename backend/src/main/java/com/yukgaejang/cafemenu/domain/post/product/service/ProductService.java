@@ -5,12 +5,12 @@ import com.yukgaejang.cafemenu.domain.post.product.dto.ProductResponse;
 import com.yukgaejang.cafemenu.domain.post.product.entity.Product;
 import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
+import com.yukgaejang.cafemenu.global.exceptionHandler.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,11 +39,7 @@ public class ProductService {
     //상품 수정(update)
     public ProductResponse updateProduct(Long id, ProductCreateRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ApiException(
-                        HttpStatus.NOT_FOUND,
-                        "PRODUCT_NOT_FOUND",
-                        "상품이 존재하지 않습니다."
-                ));
+                .orElseThrow(() -> new ApiException(ErrorCode.PRODUCT_NOT_FOUND));
 
         product.update(
                 request.name(),
@@ -61,12 +57,12 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<Product> getProducts(int page, String direction) {
 
-        Sort sort = Sort.by(Sort.Direction.ASC, "id"); //등록한 순서(기본조회)
+        Sort sort = Sort.by(Sort.Direction.ASC, "id"); //기본 조회
 
         if ("asc".equalsIgnoreCase(direction)) {
-            sort = Sort.by(Sort.Direction.ASC, "price"); //가격 낮은순
+            sort = Sort.by(Sort.Direction.ASC, "price"); // 가격 낮은 순
         } else if ("desc".equalsIgnoreCase(direction)) {
-            sort = Sort.by(Sort.Direction.DESC, "price"); //가격 높은순
+            sort = Sort.by(Sort.Direction.DESC, "price"); // 가격 높은 순
         }
 
         Pageable pageable = PageRequest.of(page, 10, sort);
@@ -78,11 +74,7 @@ public class ProductService {
         boolean isExistedProduct = productRepository.existsById(productId);
 
         if (!isExistedProduct) {
-            throw new ApiException(
-                    HttpStatus.NOT_FOUND,
-                    "PRODUCT_NOT_FOUND",
-                    "product not found"
-            );
+            throw new ApiException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         productRepository.deleteById(productId);
