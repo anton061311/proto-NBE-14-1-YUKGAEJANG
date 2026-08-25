@@ -7,9 +7,11 @@ import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +53,11 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         return ProductResponse.from(savedProduct);
+    public List<ProductResponse> getProducts() {
+        return productRepository.findAll()
+                .stream()
+                .map(ProductResponse::from)
+                .toList();
     }
 }
 

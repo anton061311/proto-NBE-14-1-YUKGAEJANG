@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import java.util.List;
+
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/products")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
@@ -40,5 +42,12 @@ public class ProductController {
         ProductResponse response = productService.updateProduct(id, request);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+}
+    @GetMapping
+    public ResponseEntity<List<ProductResponse>> getProducts() {
+        List<ProductResponse> products = productService.getProducts();
+
+        return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 }
