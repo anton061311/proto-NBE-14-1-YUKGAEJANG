@@ -1,56 +1,52 @@
 package com.yukgaejang.cafemenu.domain.post.order.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "orders")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
-    /**
-     * 주문 ID
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 주문자 이메일
-     */
+    @Column(nullable = false)
     private String email;
 
-    /**
-     * 우편변호
-     */
+    @Column(nullable = false)
     private String zipCode;
 
-    /**
-     * 배송 주소
-     */
+    @Column(nullable = false)
     private String address;
 
-    /**
-     * 주문 일시
-     */
+    @Column(nullable = false)
     private LocalDateTime orderDate;
 
-    public Order(
-            String email,
-            String zipCode,
-            String address,
-            LocalDateTime orderDate
-    ) {
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @Builder
+    public Order(String email, String zipCode, String address, LocalDateTime orderDate) {
         this.email = email;
         this.zipCode = zipCode;
         this.address = address;
         this.orderDate = orderDate;
     }
 
+    public void addItem(OrderItem newItem) {
+        for (OrderItem existing : orderItems) {
+            if (existing.getProduct().getId().equals(newItem.getProduct().getId())) {
+                existing.increaseQuantity(newItem.getQuantity());
+                return;
+            }
+        }
+        newItem.assignOrder(this);
+        this.orderItems.add(newItem);
+    }
 }
