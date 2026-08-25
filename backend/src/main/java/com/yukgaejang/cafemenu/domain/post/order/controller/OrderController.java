@@ -26,6 +26,13 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Long orderId
+    ) {
+        return this.orderService.cancelOrder(orderId);
+    }
+
     @GetMapping()
     public ResponseEntity<List<OrderResponse>> list(@RequestParam(value = "page", defaultValue = "0") int page) {
         Page<Order> paging = orderService.getList(page);
