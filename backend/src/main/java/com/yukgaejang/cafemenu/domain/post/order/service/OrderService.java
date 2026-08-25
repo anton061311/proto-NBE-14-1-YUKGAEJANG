@@ -10,9 +10,6 @@ import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import com.yukgaejang.cafemenu.domain.post.order.entity.Order;
-import com.yukgaejang.cafemenu.domain.post.order.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,18 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-
-    private final OrderRepository orderRepository;
-
-    public Page<Order> getList(int page) {
-        Pageable pageable = PageRequest.of(page, 10);
-        return this.orderRepository.findAll(pageable);
-    }
-}
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -69,5 +57,11 @@ public class OrderService {
         }
 
         return OrderResponse.from(order);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Order> getList(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        return this.orderRepository.findAll(pageable);
     }
 }
