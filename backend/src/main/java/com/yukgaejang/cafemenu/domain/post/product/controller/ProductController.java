@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/products")
@@ -43,7 +43,7 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-}
+
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getProducts() {
         List<ProductResponse> products = productService.getProducts();
@@ -51,3 +51,5 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
 }
+
+
