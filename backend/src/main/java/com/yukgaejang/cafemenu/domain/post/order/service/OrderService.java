@@ -10,6 +10,7 @@ import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,4 +56,23 @@ public class OrderService {
 
         return OrderResponse.from(order);
     }
+
+    public ResponseEntity<Void> cancelOrder(Long orderId) {
+        boolean isExistedOrder = this.orderRepository.existsById(orderId);
+
+        if (!isExistedOrder) {
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "ORDER_NOT_FOUND",
+                    "order not found"
+            );
+        }
+
+        this.orderRepository.deleteById(orderId);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
 }
