@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -58,6 +57,20 @@ public class ProductService {
                 .stream()
                 .map(ProductResponse::from)
                 .toList();
+    }
+
+    public void deleteProduct(Long productId) {
+        boolean isExistedProduct = productRepository.existsById(productId);
+
+        if (!isExistedProduct) {
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "PRODUCT_NOT_FOUND",
+                    "product not found"
+            );
+        }
+
+        productRepository.deleteById(productId);
     }
 }
 
