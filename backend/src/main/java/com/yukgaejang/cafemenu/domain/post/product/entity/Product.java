@@ -40,4 +40,14 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
+
+    // 상품 수정용 메서드
+    public void update(String name, Integer price, String imageUrl) {
+        this.name = name;
+        this.price = price;
+        this.imageUrl = imageUrl;
+    }
+
+
+
 }
