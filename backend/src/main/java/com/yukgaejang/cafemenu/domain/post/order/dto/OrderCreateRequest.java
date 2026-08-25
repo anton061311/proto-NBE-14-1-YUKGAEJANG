@@ -1,9 +1,8 @@
 package com.yukgaejang.cafemenu.domain.post.order.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.util.List;
 
 public record OrderCreateRequest(
         @Email(message = "이메일을 다시 확인해주세요.")
@@ -17,6 +16,18 @@ public record OrderCreateRequest(
 
         @NotBlank(message = "주소는 필수입니다.")
         @Size(max = 255, message = "주소를 다시 확인해주세요.")
-        String address
+        String address,
+
+        @NotEmpty(message = "주문 상품은 최소 1개 이상이어야 합니다.")
+        @Valid
+        List<OrderItemRequest> items
 ) {
+        public record OrderItemRequest(
+                @NotNull(message = "상품 ID는 필수입니다.")
+                Long productId,
+
+                @NotNull(message = "수량은 필수입니다.")
+                @Min(value = 1, message = "수량은 1개 이상이어야 합니다.")
+                Integer quantity
+        ) {}
 }
