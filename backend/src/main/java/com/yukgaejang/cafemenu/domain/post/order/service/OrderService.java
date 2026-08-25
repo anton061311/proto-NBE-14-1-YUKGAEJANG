@@ -10,6 +10,9 @@ import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,4 +78,9 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public Page<Order> getList(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+        return this.orderRepository.findAll(pageable);
+    }
 }
