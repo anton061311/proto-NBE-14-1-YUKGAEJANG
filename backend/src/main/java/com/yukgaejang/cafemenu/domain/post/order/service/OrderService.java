@@ -14,8 +14,8 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
-    public Page<Order> getList(int page){
-        Pageable pageable = PageRequest.of(page,10);
+    public Page<Order> getList(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
         return this.orderRepository.findAll(pageable);
     }
 }
