@@ -6,4 +6,5 @@ public record ProductDto(
         int price,
         String imageUrl
 ) {
+
 }
