@@ -59,4 +59,15 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable Long productId
+    ) {
+        productService.deleteProduct(productId);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
 }

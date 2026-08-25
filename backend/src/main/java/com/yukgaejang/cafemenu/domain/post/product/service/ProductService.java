@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -63,6 +62,20 @@ public class ProductService {
         Pageable pageable = PageRequest.of(page, 10);
 
         return productRepository.findAll(pageable);
+    }
+
+    public void deleteProduct(Long productId) {
+        boolean isExistedProduct = productRepository.existsById(productId);
+
+        if (!isExistedProduct) {
+            throw new ApiException(
+                    HttpStatus.NOT_FOUND,
+                    "PRODUCT_NOT_FOUND",
+                    "product not found"
+            );
+        }
+
+        productRepository.deleteById(productId);
     }
 }
 
