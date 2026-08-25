@@ -2,14 +2,14 @@ package com.yukgaejang.cafemenu.domain.post.product.controller;
 
 import com.yukgaejang.cafemenu.domain.post.product.dto.ProductCreateRequest;
 import com.yukgaejang.cafemenu.domain.post.product.dto.ProductResponse;
+import com.yukgaejang.cafemenu.domain.post.product.entity.Product;
 import com.yukgaejang.cafemenu.domain.post.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import java.util.List;
 
@@ -43,11 +43,20 @@ public class ProductController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-}
-    @GetMapping
-    public ResponseEntity<List<ProductResponse>> getProducts() {
-        List<ProductResponse> products = productService.getProducts();
 
-        return ResponseEntity.status(HttpStatus.OK).body(products);
+
+    //상품 목록 조회
+    @GetMapping
+    public ResponseEntity<List<ProductResponse>> getProducts(
+            @RequestParam(value = "page", defaultValue = "0")int page) {
+
+        Page<Product> paging = productService.getProducts(page);
+        
+        List<ProductResponse> responses = paging.getContent()
+                .stream()
+                .map(ProductResponse::from)
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 }

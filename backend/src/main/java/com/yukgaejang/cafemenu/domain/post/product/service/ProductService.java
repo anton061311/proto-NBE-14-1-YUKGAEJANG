@@ -6,11 +6,12 @@ import com.yukgaejang.cafemenu.domain.post.product.entity.Product;
 import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -53,11 +54,15 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         return ProductResponse.from(savedProduct);
-    public List<ProductResponse> getProducts() {
-        return productRepository.findAll()
-                .stream()
-                .map(ProductResponse::from)
-                .toList();
+
+    }
+
+    //상품 목록 조회
+    @Transactional(readOnly = true)
+    public Page<Product> getProducts(int page) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return productRepository.findAll(pageable);
     }
 }
 
