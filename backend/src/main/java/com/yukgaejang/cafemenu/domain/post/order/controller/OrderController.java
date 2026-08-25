@@ -21,4 +21,12 @@ public class OrderController {
         OrderResponse response = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Long orderId
+    ) {
+        return this.orderService.cancelOrder(orderId);
+    }
+
 }
