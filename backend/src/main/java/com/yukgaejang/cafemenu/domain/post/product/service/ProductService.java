@@ -4,7 +4,9 @@ import com.yukgaejang.cafemenu.domain.post.product.dto.ProductCreateRequest;
 import com.yukgaejang.cafemenu.domain.post.product.dto.ProductResponse;
 import com.yukgaejang.cafemenu.domain.post.product.entity.Product;
 import com.yukgaejang.cafemenu.domain.post.product.repository.ProductRepository;
+import com.yukgaejang.cafemenu.global.exceptionHandler.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,26 +32,15 @@ public class ProductService {
 
     }
 
-    //단건 조회(read)
-    public ProductResponse getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-
-        return ProductResponse.from(product);
-    }
-
-    //전체 상품 조회(read)
-    public List<ProductResponse> getProducts() {
-        return productRepository.findAll()
-                .stream()
-                .map(ProductResponse::from)
-                .toList();
-    }
 
     //상품 수정(update)
     public ProductResponse updateProduct(Long id, ProductCreateRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "PRODUCT_NOT_FOUND",
+                        "상품이 존재하지 않습니다."
+                ));
 
         product.update(
                 request.name(),

@@ -5,46 +5,40 @@ import com.yukgaejang.cafemenu.domain.post.product.dto.ProductResponse;
 import com.yukgaejang.cafemenu.domain.post.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/products")
+@RequestMapping("/products")
 public class ProductController {
 
     private final ProductService productService;
 
 
-    //create 상품 등록
+    //상품 등록
     @PostMapping
-    public ProductResponse createProduct(
+    public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestBody ProductCreateRequest request
     ) {
-        return productService.create(request);
+        ProductResponse response = productService.create(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    //단건 상품 조회
-    @GetMapping("/{id}")
-    public ProductResponse getProduct(@PathVariable Long id) {
-        return productService.getProduct(id);
-    }
-
-
-    //전체 상품 조회
-    @GetMapping
-    public List<ProductResponse> getProducts() {
-        return productService.getProducts();
-    }
 
 
     //상품 수정(update)
     @PutMapping("/{id}")
-    public ProductResponse updateProduct(
+    public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductCreateRequest request
     ) {
-        return productService.updateProduct(id, request);
+        ProductResponse response = productService.updateProduct(id, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
