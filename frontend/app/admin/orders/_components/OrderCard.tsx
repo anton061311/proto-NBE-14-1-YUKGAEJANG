@@ -11,8 +11,11 @@ export default function OrderCard({
   onCancel: (id: number) => void;
 }) {
   const total = useMemo(() => {
-    return 123;
-  }, [order]);
+    return order.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+  }, [order]); // 총 가격 합산 표시
 
   return (
     <article className="rounded-[14px] bg-white/80 px-6 py-5 shadow-[0_4px_18px_rgba(80,55,30,.055)]">
@@ -22,9 +25,7 @@ export default function OrderCard({
           <div className="flex items-center gap-3 text-[15px]">
             <span className="text-[#65574b]">주문번호</span>
 
-            <strong className="font-semibold text-[#3b3027]">
-              {order.id}
-            </strong>
+            <strong className="font-semibold text-[#3b3027]">{order.id}</strong>
           </div>
 
           <div className="mt-2 text-[15px] text-[#665a50]">

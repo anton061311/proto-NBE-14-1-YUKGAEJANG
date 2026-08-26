@@ -12,7 +12,7 @@ public record OrderResponse(
         LocalDateTime orderDate,
         List<OrderItemResponse> items
 ) {
-    public record OrderItemResponse(Long productId, String productName, Integer quantity) {}
+    public record OrderItemResponse(Long productId, String productName, Integer quantity, Integer price) {}
 
     public static OrderResponse from(Order order) {
         return new OrderResponse(
@@ -23,7 +23,7 @@ public record OrderResponse(
                 order.getOrderDate(),
                 order.getOrderItems().stream()
                         .map(i -> new OrderItemResponse(
-                                i.getProduct().getId(), i.getProduct().getName(), i.getQuantity()))
+                                i.getProduct().getId(), i.getProduct().getName(), i.getQuantity(),i.getProduct().getPrice()))
                         .toList()
         );
     }

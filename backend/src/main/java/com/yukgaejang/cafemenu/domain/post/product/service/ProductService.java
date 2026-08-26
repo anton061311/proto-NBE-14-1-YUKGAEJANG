@@ -79,6 +79,13 @@ public class ProductService {
 
         productRepository.deleteById(productId);
     }
+     //상품 단건 조회
+    public ProductResponse getProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ApiException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        return ProductResponse.from(product);
+    }
 }
 
 

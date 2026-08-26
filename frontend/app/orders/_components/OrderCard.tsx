@@ -22,7 +22,10 @@ export default function OrderCard({
   const [isSaving, setIsSaving] = useState(false);
 
   const total = useMemo(() => {
-    return 123;
+    return order.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+    );  //가격 합산 되서 나오게
   }, [order]);
 
   const date = new Date(order.orderDate);
