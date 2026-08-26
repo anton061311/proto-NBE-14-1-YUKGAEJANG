@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from 'react';
 
 import { ProductResponse } from '@/app/_shared/apis/productApi.type';
 
-import mockProducts from '@/app/_shared/mocks/products.mock';
-import { 
+import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -19,29 +18,43 @@ import {
 import EmptyState from './add/_components/EmptyState';
 import { useRouter } from 'next/navigation';
 
-const PRODUCTS = mockProducts;
 const PAGE_SIZE = 10;
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [page, setPage] = useState(1);
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const response = await fetch('http://localhost:8080/api/v1/products', {
+        method: 'GET',
+      });
+
+      const responseData: ProductResponse[] = await response.json();
+
+      setProducts(responseData);
+    }
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
     if (!keyword) {
-      return PRODUCTS;
+      return products;
     }
 
-    return PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       return (
         product.name.toLowerCase().includes(keyword) ||
         String(product.id).includes(keyword)
       );
     });
-  }, [search]);
+  }, [search, products]);
 
   const totalPages = Math.max(
     1,
@@ -55,9 +68,7 @@ export default function ProductsPage() {
 
   const allCurrentPageSelected =
     currentProducts.length > 0 &&
-    currentProducts.every((product) =>
-      selectedIds.includes(product.id),
-    );
+    currentProducts.every((product) => selectedIds.includes(product.id));
 
   const handleSearch = (value: string) => {
     setSearch(value);
@@ -68,10 +79,7 @@ export default function ProductsPage() {
     if (allCurrentPageSelected) {
       setSelectedIds((current) =>
         current.filter(
-          (id) =>
-            !currentProducts.some(
-              (product) => product.id === id,
-            ),
+          (id) => !currentProducts.some((product) => product.id === id),
         ),
       );
 
@@ -101,6 +109,31 @@ export default function ProductsPage() {
     setPage(Math.max(1, Math.min(totalPages, nextPage)));
   };
 
+  //관리자가 상품 삭제하는 기능
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm('상품을 삭제하시겠습니까?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:8080/api/v1/products/${id}`,
+      {
+        method: 'DELETE',
+      },
+    );
+
+    if (!response.ok) {
+      alert('상품 삭제에 실패했습니다.');
+      return;
+    }
+
+    alert('상품이 삭제되었습니다.');
+
+    setProducts((current) => current.filter((product) => product.id !== id));
+  };
+
   return (
     <main className="min-w-0 flex-1 px-6 py-10 lg:px-10">
       <div className="mx-auto max-w-[1168px]">
@@ -126,7 +159,7 @@ export default function ProductsPage() {
               transition-colors
               hover:bg-[#9d6e39]
             "
-            onClick={() => router.push("/admin/products/add")}
+            onClick={() => router.push('/admin/products/add')}
           >
             <PlusIcon className="h-4 w-4" />
             상품 등록
@@ -140,9 +173,7 @@ export default function ProductsPage() {
             <div className="relative w-full sm:max-w-[360px]">
               <input
                 value={search}
-                onChange={(event) =>
-                  handleSearch(event.target.value)
-                }
+                onChange={(event) => handleSearch(event.target.value)}
                 placeholder="상품명 또는 상품 ID 검색"
                 className="
                   h-11 w-full rounded-lg
@@ -173,17 +204,11 @@ export default function ProductsPage() {
 
                   <th>상품 정보</th>
 
-                  <th className="w-[180px]">
-                    가격
-                  </th>
+                  <th className="w-[180px]">가격</th>
 
-                  <th className="w-[180px]">
-                    상품 ID
-                  </th>
+                  <th className="w-[180px]">상품 ID</th>
 
-                  <th className="w-[190px]">
-                    관리
-                  </th>
+                  <th className="w-[190px]">관리</th>
                 </tr>
               </thead>
 
@@ -193,8 +218,10 @@ export default function ProductsPage() {
                     key={product.id}
                     product={product}
                     selected={selectedIds.includes(product.id)}
-                    onSelect={() =>
-                      handleToggleProduct(product.id)
+                    onSelect={() => handleToggleProduct(product.id)}
+                    onDelete={() => handleDelete(product.id)}
+                    onEdit={() =>
+                      router.push(`/admin/products/${product.id}/edit`)
                     }
                   />
                 ))}
@@ -261,8 +288,6 @@ function Header() {
   );
 }
 
-
-
 /* -------------------------------------------------------------------------- */
 /* Product Row                                                                */
 /* -------------------------------------------------------------------------- */
@@ -271,20 +296,21 @@ type ProductRowProps = {
   product: ProductResponse;
   selected: boolean;
   onSelect: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
 };
 
 function ProductRow({
   product,
   selected,
   onSelect,
+  onDelete,
+  onEdit,
 }: ProductRowProps) {
   return (
     <tr className="h-[91px] border-t border-[#f2ede8] text-[13px] text-[#4e4137]">
       <td className="pl-[18px]">
-        <Checkbox
-          checked={selected}
-          onChange={onSelect}
-        />
+        <Checkbox checked={selected} onChange={onSelect} />
       </td>
 
       <td>
@@ -307,14 +333,13 @@ function ProductRow({
         {formatPrice(product.price)}
       </td>
 
-      <td className="text-[#75675c]">
-        {product.id}
-      </td>
+      <td className="text-[#75675c]">{product.id}</td>
 
       <td>
         <div className="flex gap-2">
           <button
             type="button"
+            onClick={onEdit}
             className="
               h-[35px] min-w-14 rounded-lg
               border border-[#cbb59d]
@@ -328,6 +353,7 @@ function ProductRow({
 
           <button
             type="button"
+            onClick={onDelete}
             className="
               h-[35px] min-w-14 rounded-lg
               border border-[#edaaa3]
@@ -348,19 +374,11 @@ function ProductRow({
 /* Product Thumbnail                                                          */
 /* -------------------------------------------------------------------------- */
 
-function ProductThumbnail({
-  imageUrl,
-}: {
-  imageUrl?: string;
-}) {
+function ProductThumbnail({ imageUrl }: { imageUrl?: string }) {
   return (
     <div className="relative grid h-[58px] w-12 place-items-center">
       {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt=""
-          className="h-[54px] w-11 object-contain"
-        />
+        <img src={imageUrl} alt="" className="h-[54px] w-11 object-contain" />
       ) : (
         <CoffeeBagPlaceholder />
       )}
@@ -374,9 +392,7 @@ function CoffeeBagPlaceholder() {
       <div className="absolute left-1 right-1 top-[15px] flex h-[19px] flex-col items-center justify-center rounded-sm bg-[#f8f2e9]">
         <span className="mb-px h-1 w-1.5 rounded-full bg-[#9d6744]" />
 
-        <b className="text-[3px] tracking-[0.3px] text-[#594535]">
-          COFFEE
-        </b>
+        <b className="text-[3px] tracking-[0.3px] text-[#594535]">COFFEE</b>
       </div>
     </div>
   );
@@ -395,17 +411,11 @@ function Pagination({
   totalPages: number;
   onPageChange: (page: number) => void;
 }) {
-  const pages = Array.from(
-    { length: totalPages },
-    (_, index) => index + 1,
-  );
+  const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
 
   return (
     <div className="flex items-center gap-1">
-      <PaginationButton
-        disabled={page === 1}
-        onClick={() => onPageChange(1)}
-      >
+      <PaginationButton disabled={page === 1} onClick={() => onPageChange(1)}>
         <DoubleChevronLeftIcon />
       </PaginationButton>
 
@@ -425,8 +435,8 @@ function Pagination({
             grid h-8 w-8 place-items-center rounded-md text-xs
             ${
               page === pageNumber
-                ? "bg-[#ae7d44] text-white"
-                : "text-[#8b7c70] hover:bg-[#f5efe9]"
+                ? 'bg-[#ae7d44] text-white'
+                : 'text-[#8b7c70] hover:bg-[#f5efe9]'
             }
           `}
         >
@@ -516,17 +526,13 @@ function Checkbox({
         transition-colors
         ${
           checked
-            ? "border-[#ae7d44] bg-[#ae7d44]"
-            : "border-[#ded5cc] bg-white"
+            ? 'border-[#ae7d44] bg-[#ae7d44]'
+            : 'border-[#ded5cc] bg-white'
         }
       `}
     >
       {checked && (
-        <svg
-          viewBox="0 0 11 11"
-          className="h-[11px] w-[11px]"
-          fill="none"
-        >
+        <svg viewBox="0 0 11 11" className="h-[11px] w-[11px]" fill="none">
           <path
             d="M2 5.5L4.3 8L9 3"
             stroke="white"

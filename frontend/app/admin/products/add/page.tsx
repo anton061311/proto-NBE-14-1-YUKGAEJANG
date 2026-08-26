@@ -23,9 +23,7 @@ export default function AdminProductsAddPage() {
     imageUrl?: string;
   }>({});
 
-  const handlePriceChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
 
     // 숫자만 입력
@@ -58,7 +56,7 @@ export default function AdminProductsAddPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) {
       return;
     }
@@ -69,12 +67,20 @@ export default function AdminProductsAddPage() {
       imageUrl,
     };
 
-    console.log('상품 등록 요청:', requestBody);
+    const response = await fetch('http://localhost:8080/api/v1/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
 
-    // TODO:
-    // 상품 생성 API 연동
-    //
-    // await createProduct(requestBody);
+    if (!response.ok) {
+      alert('상품 등록에 실패했습니다.');
+      return;
+    }
+
+    alert('상품이 등록되었습니다.');
 
     router.push('/admin/products');
   };
@@ -156,18 +162,12 @@ export default function AdminProductsAddPage() {
                   placeholder:text-[#b2a59b]
                   transition-colors
                   focus:border-[#b89161]
-                  ${
-                    errors.name
-                      ? 'border-[#df8d84]'
-                      : 'border-[#e5ddd5]'
-                  }
+                  ${errors.name ? 'border-[#df8d84]' : 'border-[#e5ddd5]'}
                 `}
               />
 
               {errors.name ? (
-                <p className="mt-2 text-xs text-[#d56f67]">
-                  {errors.name}
-                </p>
+                <p className="mt-2 text-xs text-[#d56f67]">{errors.name}</p>
               ) : (
                 <p className="mt-2 text-xs text-[#9b8d82]">
                   고객이 인지하기 쉬운 상품명을 입력해주세요.
@@ -201,11 +201,7 @@ export default function AdminProductsAddPage() {
                     placeholder:text-[#b2a59b]
                     transition-colors
                     focus:border-[#b89161]
-                    ${
-                      errors.price
-                        ? 'border-[#df8d84]'
-                        : 'border-[#e5ddd5]'
-                    }
+                    ${errors.price ? 'border-[#df8d84]' : 'border-[#e5ddd5]'}
                   `}
                 />
 
@@ -215,9 +211,7 @@ export default function AdminProductsAddPage() {
               </div>
 
               {errors.price ? (
-                <p className="mt-2 text-xs text-[#d56f67]">
-                  {errors.price}
-                </p>
+                <p className="mt-2 text-xs text-[#d56f67]">{errors.price}</p>
               ) : (
                 <p className="mt-2 text-xs text-[#9b8d82]">
                   숫자로만 입력해주세요.
@@ -330,9 +324,7 @@ export default function AdminProductsAddPage() {
               </div>
 
               {errors.imageUrl && (
-                <p className="mt-2 text-xs text-[#d56f67]">
-                  {errors.imageUrl}
-                </p>
+                <p className="mt-2 text-xs text-[#d56f67]">{errors.imageUrl}</p>
               )}
             </div>
           </div>

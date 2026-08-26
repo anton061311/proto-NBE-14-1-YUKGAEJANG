@@ -5,7 +5,6 @@ import Logo from './_components/Logo';
 import UserIcon from './_components/UserIcon';
 import OrderCard from './_components/OrderCard';
 import { OrderResponse } from '../_shared/apis/orderApi.type';
-import mockOrders from '../_shared/mocks/orders.mock';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
@@ -18,11 +17,12 @@ export default function OrdersPage() {
         method: 'GET',
       });
 
-      const responseData: OrderResponse[] = await response.json();
+      const responseData: {
+        totalPages: number;
+        orders: OrderResponse[];
+      } = await response.json();
 
-
-
-      setOrders(responseData);
+      setOrders(responseData.orders);
     }
 
     fetchOrders();
@@ -49,11 +49,7 @@ export default function OrdersPage() {
 
     alert('주문이 취소되었습니다.');
 
-    setOrders((current) =>
-      current.map((order) =>
-        order.id === id ? { ...order, cancelled: true } : order,
-      ),
-    );
+    setOrders((current) => current.filter((order) => order.id !== id));
   };
 
   const changePage = (nextPage: number) => {

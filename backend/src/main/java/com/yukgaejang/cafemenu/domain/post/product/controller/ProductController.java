@@ -72,4 +72,13 @@ public class ProductController {
                 .status(HttpStatus.NO_CONTENT)
                 .build();
     }
+     //상품 단건 조회 매서드
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProduct(
+            @PathVariable Long id
+    ) {
+        ProductResponse response = productService.getProduct(id);
+
+        return ResponseEntity.ok(response);
+    }
 }
