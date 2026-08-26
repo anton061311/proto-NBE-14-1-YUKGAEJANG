@@ -20,7 +20,7 @@ export default function OrdersPage() {
 
       const responseData: OrderResponse[] = await response.json();
 
-      console.log('주문 목록:', responseData);
+
 
       setOrders(responseData);
     }

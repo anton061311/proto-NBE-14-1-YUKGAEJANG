@@ -17,7 +17,6 @@ export default function Page() {
 
       const responseData = await response.json();
       console.group('Product 목록 조회 API 요청 테스트');
-      console.log('responseData: ', responseData);
       console.groupEnd();
 
       setProducts(responseData);
@@ -119,7 +118,7 @@ export default function Page() {
 
     const responseData = await response.json();
 
-    console.log('주문 성공:', responseData);
+
     alert(`총 ${formatPrice(total)} 결제를 진행합니다.`);
   };
 
