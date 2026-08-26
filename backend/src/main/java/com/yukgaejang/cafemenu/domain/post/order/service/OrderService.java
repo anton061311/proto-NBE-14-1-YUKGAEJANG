@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -96,6 +97,42 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Boolean getEmail(String email) {
         return this.orderRepository.existsByEmail(email);
+    }
+
+    //상품명 검색
+    @Transactional(readOnly = true)
+    public Page<Order> searchByProductName(
+            String productName,
+            int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return orderRepository
+                .findDistinctByOrderItemsProductName(
+                        productName,
+                        pageable
+                );
+    }
+    //주문일 검색
+    @Transactional(readOnly = true)
+    public Page<Order> searchByOrderDate(
+            LocalDate orderDate,
+            int page
+    ) {
+        LocalDateTime startDateTime =
+                orderDate.atStartOfDay();
+
+        LocalDateTime endDateTime =
+                orderDate.plusDays(1).atStartOfDay();
+
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return orderRepository
+                .findAllByOrderDateGreaterThanEqualAndOrderDateLessThan(
+                        startDateTime,
+                        endDateTime,
+                        pageable
+                );
     }
 
 }

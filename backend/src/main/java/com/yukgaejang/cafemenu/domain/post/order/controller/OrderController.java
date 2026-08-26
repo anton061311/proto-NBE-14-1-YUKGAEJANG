@@ -8,10 +8,12 @@ import com.yukgaejang.cafemenu.domain.post.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -73,5 +75,52 @@ public class OrderController {
         boolean check =this.orderService.getEmail(email);
 
         return ResponseEntity.ok(check);
+    }
+
+    //상품명으로 검색
+    @GetMapping("/search/product")
+    public ResponseEntity<OrderListResponse> searchByProductName(
+            @RequestParam String productName,
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        Page<Order> paging =
+                orderService.searchByProductName(productName, page);
+
+        List<OrderResponse> responses = paging.getContent()
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
+
+        OrderListResponse response = new OrderListResponse(
+                paging.getTotalPages(),
+                responses
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    //주문일로 검색
+    @GetMapping("/search/date")
+    public ResponseEntity<OrderListResponse> searchByOrderDate(
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate orderDate,
+
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        Page<Order> paging =
+                orderService.searchByOrderDate(orderDate, page);
+
+        List<OrderResponse> responses = paging.getContent()
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
+
+        OrderListResponse response = new OrderListResponse(
+                paging.getTotalPages(),
+                responses
+        );
+
+        return ResponseEntity.ok(response);
     }
 }
