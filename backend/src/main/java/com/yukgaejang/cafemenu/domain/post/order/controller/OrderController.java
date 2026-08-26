@@ -3,6 +3,7 @@ package com.yukgaejang.cafemenu.domain.post.order.controller;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderCreateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderListResponse;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderResponse;
+import com.yukgaejang.cafemenu.domain.post.order.dto.OrderUpdateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.entity.Order;
 import com.yukgaejang.cafemenu.domain.post.order.service.OrderService;
 import jakarta.validation.Valid;
@@ -27,11 +28,21 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("{orderId}")
+    public ResponseEntity<OrderResponse> updateOrder(
+            @PathVariable Long orderId,
+            @RequestBody @Valid OrderUpdateRequest request
+    ) {
+        OrderResponse response = orderService.updateOrder(orderId, request);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(
             @PathVariable Long orderId
     ) {
-        return this.orderService.cancelOrder(orderId);
+        this.orderService.cancelOrder(orderId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping()
