@@ -11,7 +11,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [page, setPage] = useState(1);
 
-  //주문 조회 연결
+  //주문 목록 연결
   useEffect(() => {
     async function fetchOrders() {
       const response = await fetch('http://localhost:8080/api/v1/orders', {
