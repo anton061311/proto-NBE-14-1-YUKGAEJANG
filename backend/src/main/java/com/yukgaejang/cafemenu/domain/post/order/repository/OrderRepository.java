@@ -16,4 +16,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByEmail(String email, Pageable pageable);
 
     Boolean existsByEmail(String email);
+
+    Page<Order> findDistinctByOrderItemsProductName(
+            String productName,
+            Pageable pageable
+    );
+
+    Page<Order> findAllByOrderDateGreaterThanEqualAndOrderDateLessThan(
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            Pageable pageable
+    );
 }

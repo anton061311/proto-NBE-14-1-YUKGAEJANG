@@ -29,7 +29,7 @@ export type OrderItemRequest = {
 //
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 /**
- * 주문 생성/목록 API Response 타입
+ * 주문 생성 Response 타입
  */
 export type OrderResponse = {
   id: number;
@@ -51,3 +51,11 @@ export type OrderItemResponse = {
 
 
 };
+
+/**
+ * 목록 API Response 타입
+ */
+export type OrderListResponse = {
+  totalPages: number;
+  orders: OrderResponse[];
+}

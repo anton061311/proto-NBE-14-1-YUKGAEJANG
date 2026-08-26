@@ -2,6 +2,7 @@ package com.yukgaejang.cafemenu.domain.post.order.service;
 
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderCreateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderResponse;
+import com.yukgaejang.cafemenu.domain.post.order.dto.OrderUpdateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.entity.Order;
 import com.yukgaejang.cafemenu.domain.post.order.entity.OrderItem;
 import com.yukgaejang.cafemenu.domain.post.order.repository.OrderRepository;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -62,6 +64,20 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
+    @Transactional
+    public OrderResponse updateOrder(
+            Long orderId,
+            OrderUpdateRequest request
+    ) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ApiException(ErrorCode.ORDER_NOT_FOUND));
+
+        order.updateZipCodeAndAddress(request.zipCode(), request.address());
+        orderRepository.save(order);
+
+        return OrderResponse.from(order);
+    }
+
     public ResponseEntity<Void> cancelOrder(Long orderId) {
         boolean isExistedOrder = this.orderRepository.existsById(orderId);
 
@@ -92,4 +108,46 @@ public class OrderService {
         Pageable pageable = PageRequest.of(page, 5);
         return this.orderRepository.findAllByEmail(email, pageable);
     }
+
+    @Transactional(readOnly = true)
+    public Boolean getEmail(String email) {
+        return this.orderRepository.existsByEmail(email);
+    }
+
+    //상품명 검색
+    @Transactional(readOnly = true)
+    public Page<Order> searchByProductName(
+            String productName,
+            int page
+    ) {
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return orderRepository
+                .findDistinctByOrderItemsProductName(
+                        productName,
+                        pageable
+                );
+    }
+    //주문일 검색
+    @Transactional(readOnly = true)
+    public Page<Order> searchByOrderDate(
+            LocalDate orderDate,
+            int page
+    ) {
+        LocalDateTime startDateTime =
+                orderDate.atStartOfDay();
+
+        LocalDateTime endDateTime =
+                orderDate.plusDays(1).atStartOfDay();
+
+        Pageable pageable = PageRequest.of(page, 10);
+
+        return orderRepository
+                .findAllByOrderDateGreaterThanEqualAndOrderDateLessThan(
+                        startDateTime,
+                        endDateTime,
+                        pageable
+                );
+    }
+
 }

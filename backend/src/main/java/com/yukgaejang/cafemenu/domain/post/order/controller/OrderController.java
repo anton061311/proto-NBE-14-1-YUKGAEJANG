@@ -3,15 +3,18 @@ package com.yukgaejang.cafemenu.domain.post.order.controller;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderCreateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderListResponse;
 import com.yukgaejang.cafemenu.domain.post.order.dto.OrderResponse;
+import com.yukgaejang.cafemenu.domain.post.order.dto.OrderUpdateRequest;
 import com.yukgaejang.cafemenu.domain.post.order.entity.Order;
 import com.yukgaejang.cafemenu.domain.post.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,11 +30,21 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping("{orderId}")
+    public ResponseEntity<OrderResponse> updateOrder(
+            @PathVariable Long orderId,
+            @RequestBody @Valid OrderUpdateRequest request
+    ) {
+        OrderResponse response = orderService.updateOrder(orderId, request);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(
             @PathVariable Long orderId
     ) {
-        return this.orderService.cancelOrder(orderId);
+        this.orderService.cancelOrder(orderId);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping()
@@ -54,6 +67,60 @@ public class OrderController {
     @GetMapping(params = "email")
     public ResponseEntity<OrderListResponse> listByEmail(@RequestParam @Valid String email, @RequestParam(value = "page", defaultValue = "0") int page) {
         Page<Order> paging = orderService.getListByEmail(email, page);
+
+        List<OrderResponse> responses = paging.getContent()
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
+
+        OrderListResponse response = new OrderListResponse(
+                paging.getTotalPages(),
+                responses
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<Boolean> existEmail(@RequestParam @Valid String email){
+        boolean check =this.orderService.getEmail(email);
+
+        return ResponseEntity.ok(check);
+    }
+
+    //상품명으로 검색
+    @GetMapping("/search/product")
+    public ResponseEntity<OrderListResponse> searchByProductName(
+            @RequestParam String productName,
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        Page<Order> paging =
+                orderService.searchByProductName(productName, page);
+
+        List<OrderResponse> responses = paging.getContent()
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
+
+        OrderListResponse response = new OrderListResponse(
+                paging.getTotalPages(),
+                responses
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    //주문일로 검색
+    @GetMapping("/search/date")
+    public ResponseEntity<OrderListResponse> searchByOrderDate(
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate orderDate,
+
+            @RequestParam(value = "page", defaultValue = "0") int page
+    ) {
+        Page<Order> paging =
+                orderService.searchByOrderDate(orderDate, page);
 
         List<OrderResponse> responses = paging.getContent()
                 .stream()
