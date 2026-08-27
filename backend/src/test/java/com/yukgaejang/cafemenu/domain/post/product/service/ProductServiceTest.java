@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,10 +40,11 @@ public class ProductServiceTest {
 
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation ->
-                        (Product) invocation.getArgument(0)
+                        invocation.getArgument(0)
                 );
 
-        ProductResponse response = productService.create(request);
+        ProductResponse response =
+                productService.create(request);
 
         ArgumentCaptor<Product> captor =
                 ArgumentCaptor.forClass(Product.class);
@@ -52,14 +54,26 @@ public class ProductServiceTest {
         Product savedProduct = captor.getValue();
 
         assertAll(
-                () -> assertEquals("아메리카노", savedProduct.getName()),
-                () -> assertEquals(3000, savedProduct.getPrice()),
+                () -> assertEquals(
+                        "아메리카노",
+                        savedProduct.getName()
+                ),
+                () -> assertEquals(
+                        3000,
+                        savedProduct.getPrice()
+                ),
                 () -> assertEquals(
                         "americano.jpg",
                         savedProduct.getImageUrl()
                 ),
-                () -> assertEquals("아메리카노", response.name()),
-                () -> assertEquals(3000, response.price()),
+                () -> assertEquals(
+                        "아메리카노",
+                        response.name()
+                ),
+                () -> assertEquals(
+                        3000,
+                        response.price()
+                ),
                 () -> assertEquals(
                         "americano.jpg",
                         response.imageUrl()
@@ -98,14 +112,26 @@ public class ProductServiceTest {
                 productService.updateProduct(1L, request);
 
         assertAll(
-                () -> assertEquals("카페라떼", product.getName()),
-                () -> assertEquals(4500, product.getPrice()),
+                () -> assertEquals(
+                        "카페라떼",
+                        product.getName()
+                ),
+                () -> assertEquals(
+                        4500,
+                        product.getPrice()
+                ),
                 () -> assertEquals(
                         "cafe-latte.jpg",
                         product.getImageUrl()
                 ),
-                () -> assertEquals("카페라떼", response.name()),
-                () -> assertEquals(4500, response.price())
+                () -> assertEquals(
+                        "카페라떼",
+                        response.name()
+                ),
+                () -> assertEquals(
+                        4500,
+                        response.price()
+                )
         );
 
         verify(productRepository).findById(1L);
@@ -132,7 +158,10 @@ public class ProductServiceTest {
 
         ApiException exception = assertThrows(
                 ApiException.class,
-                () -> productService.updateProduct(999L, request)
+                () -> productService.updateProduct(
+                        999L,
+                        request
+                )
         );
 
         assertEquals(
@@ -156,25 +185,39 @@ public class ProductServiceTest {
 
         Page<Product> emptyPage = Page.empty();
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(emptyPage);
+        when(productRepository.findAll(
+                any(Specification.class),
+                any(Pageable.class)
+        )).thenReturn(emptyPage);
 
         Page<Product> result =
-                productService.getProducts(0, null,null);
+                productService.getProducts(
+                        0,
+                        null,
+                        null
+                );
 
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(productRepository).findAll(captor.capture());
+        verify(productRepository).findAll(
+                any(Specification.class),
+                captor.capture()
+        );
 
         Pageable pageable = captor.getValue();
-        Sort.Order idOrder = pageable.getSort().getOrderFor("id");
+
+        Sort.Order idOrder =
+                pageable.getSort().getOrderFor("id");
 
         assertSame(emptyPage, result);
         assertEquals(0, pageable.getPageNumber());
         assertEquals(10, pageable.getPageSize());
         assertNotNull(idOrder);
-        assertEquals(Sort.Direction.ASC, idOrder.getDirection());
+        assertEquals(
+                Sort.Direction.ASC,
+                idOrder.getDirection()
+        );
     }
 
     @Test
@@ -186,17 +229,27 @@ public class ProductServiceTest {
         ProductService productService =
                 new ProductService(productRepository);
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(productRepository.findAll(
+                any(Specification.class),
+                any(Pageable.class)
+        )).thenReturn(Page.empty());
 
-        productService.getProducts(0, "asc",null);
+        productService.getProducts(
+                0,
+                "asc",
+                null
+        );
 
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(productRepository).findAll(captor.capture());
+        verify(productRepository).findAll(
+                any(Specification.class),
+                captor.capture()
+        );
 
         Pageable pageable = captor.getValue();
+
         Sort.Order priceOrder =
                 pageable.getSort().getOrderFor("price");
 
@@ -216,17 +269,27 @@ public class ProductServiceTest {
         ProductService productService =
                 new ProductService(productRepository);
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(productRepository.findAll(
+                any(Specification.class),
+                any(Pageable.class)
+        )).thenReturn(Page.empty());
 
-        productService.getProducts(0, "desc",null);
+        productService.getProducts(
+                0,
+                "desc",
+                null
+        );
 
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(productRepository).findAll(captor.capture());
+        verify(productRepository).findAll(
+                any(Specification.class),
+                captor.capture()
+        );
 
         Pageable pageable = captor.getValue();
+
         Sort.Order priceOrder =
                 pageable.getSort().getOrderFor("price");
 
@@ -240,7 +303,6 @@ public class ProductServiceTest {
     @Test
     @DisplayName("가격 정렬 적용 후 정렬 방향을 전달하지 않으면 기본 정렬로 돌아간다")
     void productListShouldReturnToDefaultSortAfterPriceSort() {
-        // given
         ProductRepository productRepository =
                 mock(ProductRepository.class);
 
@@ -249,51 +311,87 @@ public class ProductServiceTest {
 
         Page<Product> emptyPage = Page.empty();
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(emptyPage);
+        when(productRepository.findAll(
+                any(Specification.class),
+                any(Pageable.class)
+        )).thenReturn(emptyPage);
 
-        // when
-        productService.getProducts(0, "asc",null);
-        productService.getProducts(0, "desc",null);
-        productService.getProducts(0, null,null);
+        productService.getProducts(
+                0,
+                "asc",
+                null
+        );
 
-        // then
+        productService.getProducts(
+                0,
+                "desc",
+                null
+        );
+
+        productService.getProducts(
+                0,
+                null,
+                null
+        );
+
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(productRepository, times(3))
-                .findAll(captor.capture());
+        verify(productRepository, times(3)).findAll(
+                any(Specification.class),
+                captor.capture()
+        );
 
-        List<Pageable> pageables = captor.getAllValues();
+        List<Pageable> pageables =
+                captor.getAllValues();
 
-        Pageable ascendingPageable = pageables.get(0);
-        Pageable descendingPageable = pageables.get(1);
-        Pageable defaultPageable = pageables.get(2);
+        Pageable ascendingPageable =
+                pageables.get(0);
+
+        Pageable descendingPageable =
+                pageables.get(1);
+
+        Pageable defaultPageable =
+                pageables.get(2);
 
         Sort.Order ascendingPriceOrder =
-                ascendingPageable.getSort().getOrderFor("price");
+                ascendingPageable
+                        .getSort()
+                        .getOrderFor("price");
 
         Sort.Order descendingPriceOrder =
-                descendingPageable.getSort().getOrderFor("price");
+                descendingPageable
+                        .getSort()
+                        .getOrderFor("price");
 
         Sort.Order defaultIdOrder =
-                defaultPageable.getSort().getOrderFor("id");
+                defaultPageable
+                        .getSort()
+                        .getOrderFor("id");
 
         Sort.Order defaultPriceOrder =
-                defaultPageable.getSort().getOrderFor("price");
+                defaultPageable
+                        .getSort()
+                        .getOrderFor("price");
 
         assertAll(
-                () -> assertNotNull(ascendingPriceOrder),
+                () -> assertNotNull(
+                        ascendingPriceOrder
+                ),
                 () -> assertEquals(
                         Sort.Direction.ASC,
                         ascendingPriceOrder.getDirection()
                 ),
-                () -> assertNotNull(descendingPriceOrder),
+                () -> assertNotNull(
+                        descendingPriceOrder
+                ),
                 () -> assertEquals(
                         Sort.Direction.DESC,
                         descendingPriceOrder.getDirection()
                 ),
-                () -> assertNotNull(defaultIdOrder),
+                () -> assertNotNull(
+                        defaultIdOrder
+                ),
                 () -> assertEquals(
                         Sort.Direction.ASC,
                         defaultIdOrder.getDirection()
@@ -311,15 +409,24 @@ public class ProductServiceTest {
         ProductService productService =
                 new ProductService(productRepository);
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(Page.empty());
+        when(productRepository.findAll(
+                any(Specification.class),
+                any(Pageable.class)
+        )).thenReturn(Page.empty());
 
-        productService.getProducts(2, null,null);
+        productService.getProducts(
+                2,
+                null,
+                null
+        );
 
         ArgumentCaptor<Pageable> captor =
                 ArgumentCaptor.forClass(Pageable.class);
 
-        verify(productRepository).findAll(captor.capture());
+        verify(productRepository).findAll(
+                any(Specification.class),
+                captor.capture()
+        );
 
         Pageable pageable = captor.getValue();
 
@@ -338,7 +445,11 @@ public class ProductServiceTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> productService.getProducts(-1, null,null)
+                () -> productService.getProducts(
+                        -1,
+                        null,
+                        null
+                )
         );
 
         verifyNoInteractions(productRepository);
@@ -387,6 +498,8 @@ public class ProductServiceTest {
         );
 
         verify(productRepository).existsById(999L);
-        verify(productRepository, never()).deleteById(999L);
+
+        verify(productRepository, never())
+                .deleteById(999L);
     }
 }
