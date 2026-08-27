@@ -52,7 +52,14 @@ class OrderServiceTest {
 
         // given
         Product product = new Product("예가체프", 15000, "a.jpg");
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.empty());
         when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -71,7 +78,14 @@ class OrderServiceTest {
 
         // given
         Product product = new Product("예가체프", 15000, "a.jpg");
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.empty());
         when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -90,7 +104,14 @@ class OrderServiceTest {
     void throwExceptionWhenProductNotFound() {
 
         // given
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.empty());
         when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
@@ -100,27 +121,55 @@ class OrderServiceTest {
                 .isInstanceOf(ApiException.class);
     }
 
-    // 4. 기존 주문이 있을 때, 새 Order를 만들지 않고 병합이 되는지
+    // 4. 이메일, 주소, 우편번호가 모두 같으면 기존 주문에 병합되는지
     @Test
-    @DisplayName("같은 이메일로 당일 재주문하면 새 Order를 생성하지 않는다")
-    void notCreateNewOrderWhenExistingOrderFound() {
-
+    @DisplayName("이메일·주소·우편번호가 모두 같으면 기존 주문에 병합한다")
+    void mergeOrderWhenDeliveryInformationMatches() {
         // given
-        Product product = new Product("예가체프", 15000, "a.jpg");
+        Product product = new Product(
+                "예가체프",
+                15_000,
+                "a.jpg"
+        );
+
         Order existingOrder = Order.builder()
-                .email("test@example.com").zipCode("12345")
-                .address("서울시 강남구").orderDate(LocalDateTime.now())
+                .email("test@example.com")
+                .zipCode("12345")
+                .address("서울시 강남구")
+                .orderDate(LocalDateTime.now())
                 .build();
 
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 강남구"),
+                        eq("12345")
+                ))
                 .thenReturn(Optional.of(existingOrder));
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
 
         // when
         orderService.createOrder(requestWith(1L, 2));
 
         // then
-        verify(orderRepository, never()).save(any());
+        verify(orderRepository)
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 강남구"),
+                        eq("12345")
+                );
+
+        verify(orderRepository, never()).save(any(Order.class));
+
+        assertThat(existingOrder.getOrderItems()).hasSize(1);
+        assertThat(existingOrder.getOrderItems().getFirst().getQuantity())
+                .isEqualTo(2);
     }
 
     @Test
@@ -135,7 +184,14 @@ class OrderServiceTest {
                 .build();
         existingOrder.addItem(OrderItem.builder().product(product).quantity(2).build()); // 이미 담긴 상태
 
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.of(existingOrder));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
@@ -156,7 +212,14 @@ class OrderServiceTest {
         ReflectionTestUtils.setField(productA, "id", 1L);
         ReflectionTestUtils.setField(productB, "id", 2L);
 
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.empty());
         when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(productRepository.findById(1L)).thenReturn(Optional.of(productA));
@@ -190,7 +253,14 @@ class OrderServiceTest {
                 .address("서울시 강남구").orderDate(LocalDateTime.now())
                 .build();
 
-        when(orderRepository.findByEmailAndOrderDateBetween(any(), any(), any()))
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        anyString(),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        anyString(),
+                        anyString()
+                ))
                 .thenReturn(Optional.of(existingOrder));
         when(productRepository.findById(1L)).thenReturn(Optional.of(productA));
         when(productRepository.findById(999L)).thenReturn(Optional.empty());
@@ -207,8 +277,143 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.createOrder(request))
                 .isInstanceOf(ApiException.class);
 
-        // 주의: @Transactional이 실제 DB 트랜잭션으로 롤백을 보장하지만,
-        // 이 순수 Mockito 테스트에서는 메모리상의 existingOrder 객체 자체는 롤백되지 않는다.
-        // 즉 productA 항목은 이미 addItem()으로 추가된 상태로 남아있을 수 있다 — 아래 8번 참고.
+    }
+
+    // 8. 같은 이메일에 대한 다른 주소
+    @Test
+    @DisplayName("같은 이메일이라도 주소가 다르면 신규 주문을 생성한다")
+    void createNewOrderWhenAddressDiffers() {
+        // given
+        Product product = new Product(
+                "예가체프",
+                15_000,
+                "a.jpg"
+        );
+
+        OrderCreateRequest request = new OrderCreateRequest(
+                "test@example.com",
+                "12345",
+                "서울시 서초구",
+                List.of(
+                        new OrderCreateRequest.OrderItemRequest(
+                                1L,
+                                1
+                        )
+                )
+        );
+
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 서초구"),
+                        eq("12345")
+                ))
+                .thenReturn(Optional.empty());
+
+        when(orderRepository.save(any(Order.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0)
+                );
+
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        // when
+        OrderResponse response =
+                orderService.createOrder(request);
+
+        // then
+        verify(orderRepository)
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 서초구"),
+                        eq("12345")
+                );
+
+        verify(orderRepository).save(
+                argThat(order ->
+                        order.getEmail().equals("test@example.com") &&
+                                order.getAddress().equals("서울시 서초구") &&
+                                order.getZipCode().equals("12345")
+                )
+        );
+
+        assertThat(response.address())
+                .isEqualTo("서울시 서초구");
+        assertThat(response.zipCode())
+                .isEqualTo("12345");
+    }
+
+    // 9. 같은 이메일에 대한 다른 우편번호로 주분
+    @Test
+    @DisplayName("이메일과 주소가 같아도 우편번호가 다르면 신규 주문을 생성한다")
+    void createNewOrderWhenZipCodeDiffers() {
+        // given
+        Product product = new Product(
+                "예가체프",
+                15_000,
+                "a.jpg"
+        );
+
+        OrderCreateRequest request = new OrderCreateRequest(
+                "test@example.com",
+                "54321",
+                "서울시 강남구",
+                List.of(
+                        new OrderCreateRequest.OrderItemRequest(
+                                1L,
+                                1
+                        )
+                )
+        );
+
+        when(orderRepository
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 강남구"),
+                        eq("54321")
+                ))
+                .thenReturn(Optional.empty());
+
+        when(orderRepository.save(any(Order.class)))
+                .thenAnswer(invocation ->
+                        invocation.getArgument(0)
+                );
+
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
+
+        // when
+        OrderResponse response =
+                orderService.createOrder(request);
+
+        // then
+        verify(orderRepository)
+                .findByEmailAndOrderDateBetweenAndAddressAndZipCode(
+                        eq("test@example.com"),
+                        any(LocalDateTime.class),
+                        any(LocalDateTime.class),
+                        eq("서울시 강남구"),
+                        eq("54321")
+                );
+
+        verify(orderRepository).save(
+                argThat(order ->
+                        order.getEmail().equals("test@example.com") &&
+                                order.getAddress().equals("서울시 강남구") &&
+                                order.getZipCode().equals("54321")
+                )
+        );
+
+        assertThat(response.address())
+                .isEqualTo("서울시 강남구");
+        assertThat(response.zipCode())
+                .isEqualTo("54321");
     }
 }
