@@ -76,7 +76,9 @@ export default function AdminProductsAddPage() {
     });
 
     if (!response.ok) {
-      alert('상품 등록에 실패했습니다.');
+      const errorData = await response.json();
+
+      alert(errorData.message ?? '상품 등록에 실패했습니다.');
       return;
     }
 
