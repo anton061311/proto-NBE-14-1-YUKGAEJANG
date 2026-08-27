@@ -3,10 +3,9 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
+import { API_BASE_URL } from '@/app/_shared/apis/apiConfig';
 import type { ProductResponse } from '@/app/_shared/apis/productApi.type';
 
-const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 const PRODUCT_IMAGES = Array.from(
     { length: 10 },
     (_, index) => `/imgs/product_type_${index}.png`,

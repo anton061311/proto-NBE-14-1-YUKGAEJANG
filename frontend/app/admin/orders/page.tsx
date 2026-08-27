@@ -1,15 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Logo from './_components/Logo';
-import UserIcon from './_components/UserIcon';
+import { API_BASE_URL } from '@/app/_shared/apis/apiConfig';
 import OrderCard from './_components/OrderCard';
 import {
   OrderListResponse,
   OrderResponse,
 } from '@/app/_shared/apis/orderApi.type';
-
-const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 type SearchType = 'product' | 'date';
 type ActiveSearchType = 'all' | SearchType;
@@ -138,7 +135,7 @@ export default function AdminOrdersPage() {
 
     if (!confirmed) return;
 
-    const response = await fetch(`http://localhost:8080/api/v1/orders/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
       method: 'DELETE',
     });
 
