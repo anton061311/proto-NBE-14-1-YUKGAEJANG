@@ -1,8 +1,18 @@
 package com.yukgaejang.cafemenu.global.exceptionHandler;
 
-public class ApiException extends RuntimeException {
+import lombok.Getter;
 
-    public ApiException(String message) {
-        super(message);
+@Getter
+public class ApiException extends RuntimeException {
+    private final ErrorCode errorCode;
+
+    public ApiException (ErrorCode errorCode) {
+        super(errorCode.getDefaultMessage());
+        this.errorCode = errorCode;
+    }
+
+    public ApiException (ErrorCode errorCode, String customMessage) {
+        super(customMessage);
+        this.errorCode = errorCode;
     }
 }
